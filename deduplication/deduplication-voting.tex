@@ -1,0 +1,225 @@
+\documentclass[12pt]{article}
+\usepackage{geometry} % see geometry.pdf on how to lay out the page. There's lots.
+\geometry{a4paper} % or letter or a5paper or ... etc
+% \geometry{landscape} % rotated page geometry
+
+\usepackage{url}
+\usepackage[hyphenbreaks]{breakurl}
+\def\UrlBreaks{\do\/\do-} % a bit of magic from https://norwied.wordpress.com/2012/07/10/how-to-break-long-urls-in-bibtex/
+\usepackage{hyperref}
+
+\usepackage{enumitem}
+
+\title{Sustainability Complexity,\\Hash Tables, and Sorting}
+\author{Introduction to Data Structures}
+\date{2-3 weeks} % delete this line to display the current date
+
+%%% BEGIN DOCUMENT
+\begin{document}
+
+\maketitle
+
+
+
+In this lab, we'll be exploring the relationship between computational complexity - the efficiency of the programs we write - and the energy consumption our programs use. An important initial caveat - the calculations we'll be doing here are really ``back of the envelope" style calculations. They're an estimate, and may actually be far from the real values, but hopefully they'll give us a sense of how computational complexity relates to energy consumption.
+
+A few initial reminders / things to know for the less physics savvy among us:
+\begin{itemize}
+\item Watts (W) - watts are a measure of power and they meausre Joules per second.
+\item Watt Hours (Wh) - watt-hours are a measure of energy consumption and they measure watts used in an hour.  E.g., if you know that something uses 40 watts over the time period of an hour, then 40 watt-hours were used.
+\end{itemize}
+
+Note also that we'll be converting from seconds used to energy consumption (watt hours). Computational complexity is more often measured not based on seconds, since the seconds used can vary from computer to computer, but based on computation steps used. If we were going to convert that to energy consumption, we'd first need to determine the performance per watt (number of computation steps per watt) that our computer could perform.
+
+\section{Getting Started}
+
+We'll start by setting up a few variables and functions that will be useful for the later steps of this lab.  It's up to you how to organize and name these variables and functions.  Remember: always try to follow best coding practices such as style guides.  This includes, e.g., naming static variables in all caps and appropriately determining which methods should be private or public.  Also add anything that will be useful in order to use your created class in later parts of the lab (e.g., initialization and accessor methods).
+
+\begin{enumerate}
+\item Start off by setting up a static variable that will be useful in this lab: the watts used by your computer.  You can use a default value of 200, or look up the specific value for the computer you're using.
+\item Find something that consumes (a small amount of) energy and determine how many watt-hours that uses. For example, you might find the number of watt-hours it takes to make a cup of coffee. Make a variable for this amount. In later parts of the lab you'll be expressing your programming work in, e.g., energy it would take to make a cup of coffee.
+\item We'll be determining the complexity of a program by timing it. Make a method that takes a floating point number of seconds and returns the number of watt-hours consumed.
+\item Make a method that computes the number of the item you've chosen above (e.g., cups of coffee) that could be achieved with a given amount of energy (watt-hours). Then use that to make another function that takes seconds of computation time and returns the number of your chosen items that could be achieved.
+\item Now that we can convert computation seconds used to units of something (e.g., cups of coffee), we can determine how many of these thing could be created from the energy that one of our programs uses! In order to do that, we'll need to be able to determine the number of seconds taken by a program.  Make methods that allow you to start a timer, end a timer, and get the number of seconds that elapsed using the System class.
+\end{enumerate}
+
+We'll be trying out these methods and analyses on more interesting questions later in this lab, but for now let's put all of this together by analyzing the running time of the Fibonacci function:
+\begin{enumerate}
+\item Create a function that returns the nth Fibonacci value when given n.
+\item Then use the functions you've built to time the function and convert it to the number of other things that could have been created using that energy (e.g., cups of coffee).  Getting the precise time of a specific function is tricky, since there are other things being run on your computer at the same time. To mitigate some of this issue, run the given function multiple times and return the average number of seconds taken by the function. 
+\item Determine and print the number of seconds it takes to calculate the 100th Fibonacci value and the number of items that could be created using that amount of energy.  (If it's taking a very long time to compute the 100th value, it's fine to compute a smaller value and report that out instead.)
+\item Make a function that can plot the value of n on the x-axis versus the number of items on the y-axis.  You can do this using a library called Tablesaw.  First add the Maven dependencies to your \texttt{pom.xml}:
+\begin{verbatim}
+	<dependency>
+    <groupId>tech.tablesaw</groupId>
+    <artifactId>tablesaw-core</artifactId>
+    <version>0.30.2</version>
+	</dependency>
+	<dependency>
+    <groupId>tech.tablesaw</groupId>
+    <artifactId>tablesaw-jsplot</artifactId>
+    <version>0.30.2</version>
+	</dependency>
+\end{verbatim}
+Then you can use LinePlot to graph it.  Here's a small example of how that works:
+\begin{verbatim}
+double[] xvals = {1, 2, 3, 4};
+DoubleColumn column1 = DoubleColumn.create("x-axis", xvals);
+double[] yvals = {2, 4, 6, 8};
+DoubleColumn column2 = DoubleColumn.create("y-axis", yvals);
+Table table = Table.create("for plot");
+table.addColumns(column1, column2);
+Plot.show(LinePlot.create("title", table, "x-axis", "y-axis"));
+\end{verbatim}
+If you have multiple algorithms you would like to compare (as you will later in this lab), you can add series to the graph so that there are multiple colors as in the below example:
+\begin{verbatim}
+double[] xvals = {1, 2, 3, 4, 1, 2, 3, 4};
+DoubleColumn column1 = DoubleColumn.create("x-axis", xvals);
+double[] yvals = {1, 2, 3, 4, 1, 4, 6, 8};
+DoubleColumn column2 = DoubleColumn.create("y-axis", yvals);
+String[] categories = {"a", "a", "a", "a", "b", "b", "b", "b"};
+StringColumn catcolumn = StringColumn.create("algorithm", categories);
+Table table = Table.create("for plot");
+table.addColumns(column1, column2, catcolumn);
+Plot.show(LinePlot.create(
+     "title", table, "x-axis", "y-axis", "algorithm"));
+\end{verbatim}
+In addition to loading the correct data into the above table, you should be sure to customize your axis and graph titles appropriately based on the energy units you chose to consider and graph.
+
+\item \textbf{Hand in your work} for this section by saving your resulting line graph as the file \texttt{fibonacci.png} and adding, committing, and pushing that to the top level of your directory structure for this lab.  Again, if plotting all the Fibonacci values and times from 1 to 100 is taking too long, feel free to choose a smaller number - just make sure it's big enough so that you can see the graph.
+\end{enumerate}
+
+\section{Data Deduplication}
+One important, and potentially expensive (in terms of efficiency and energy consumption), task when handling data is data deduplication. The goal of this task is to make sure that each item in your data set (e.g., each person) only appears once. We'll explore 3 different ways this can be done in this lab, and determine which one is most efficient.
+
+\subsection{The Data: Voting Rolls}
+In the United States, in order to vote in elections you must be registered to vote.  States must regularly update these voting rolls in order to account for deaths and newly registered voters.  Some states additionally regularly audit their voting rolls and remove voters based on various rules -- many of these rules have been criticized for being unnecessarily harsh and purposefully suppressing the vote.  In the 2018 election in Georgia, an ``exact match" rule was instituted to require a voter's name as listed on their government-issued id (e.g., their drivers license) to exactly match their name as listed on the voting rolls.  Voters whose names did not match exactly were removed from the voting rolls.  (See more information about the policy, the racial disparity caused by this rule, and one attempt to fix it here: \url{https://www.washingtonpost.com/news/monkey-cage/wp/2018/10/20/georgias-exact-match-law-could-disenfranchise-3031802-eligible-voters-my-research-finds/})
+
+Ideally, to examine the impact of such a rule, we would count the number of people we could duplicate between voting rolls and voter id lists.  While voting rolls are public, we don't have access to voter id lists, so instead we'll focus solely on deduplication of voting rolls.  We'll be looking at the Ohio statewide voter rolls, available here: \url{https://www6.ohiosos.gov/ords/f?p=VOTERFTP:STWD:::#stwdVtrFiles}.  Each row in the data represents a single registered voter, and the attributes (columns) include their name, address, and other voting information.  The statewide information is divided by county across 4 files - throughout this assignment it's fine to use any of those 4 files or to combine them all into a single file if you'd prefer.  Note that you'll need to create a way to programmatically read in a given file for testing.
+
+
+\subsection{Determining Equality}
+
+The deduplication goal we will consider here is to collect a list of \emph{individuals} who are eligible to vote.  I.e., we would like to make sure that no one is listed on the voting rolls twice.
+
+In order to determine if two rows contain the same person, we need to develop a function that checks the information that should be unique to each person and compares it to determine equality. We need to decide what information this should be carefully, or deduplication will fail. \\
+
+\textbf{Requirements:}
+\begin{enumerate}
+\item Create an object to hold a single row from the CSV.  This object does \emph{not} need to hold all fields in the CSV - you should store only the fields that will be necessary in order to deduplicate the data.
+\item Implement the Comparable interface by making a \verb+compareTo+ function in the object you just created that returns 0 if and only if the compared items are the same person according to the way you have decided to check uniqueness.  Later in this lab, you will be asked to print out the names of the attributes used to determine equality - it's suggested that you make this determination by requiring that all chosen attributes are exactly equal to each other (and not some other more complicated scheme).
+\item Describe and justify how you are determining uniqueness in your \verb+README+ file.
+\end{enumerate}
+
+\subsection{Data Storage}
+
+You'll need a class to store the full data set.\\
+
+\textbf{Requirements:}
+\begin{enumerate}
+\item Make a class to store the full data set.  Your constructor for the class should take the name of a CSV file as input and should do the work of reading in the data from the CSV and parsing it into an \verb+ArrayList+ containing the objects you developed in the previous section.  Recall that you can use the \verb+opencsv+ library to do much of this work for you.
+\end{enumerate}
+
+\subsection{Deduplication Methods}
+
+You will add three data deduplication methods to the data set class you created in the previous section.  Each of these methods should return an \verb+ArrayList+ of your designed objects that contains only the non-duplicated individuals who were in the voting rolls.
+
+\paragraph{All Pairs Deduplication}
+One way to find the number of duplicates in a data set is to compare each item to each other item in the data set, counting duplicates as you go. Make sure not to count the comparison of an item to itself as a duplicate.  We will call this the ``all pairs" method of data deduplication.\\
+
+\textbf{Requirements:}
+\begin{enumerate}[start=1]
+\item Create a method that uses this ``all pairs" method of deduplication to return the non-duplicate items in a given data set.  The method signature should be:\\
+\verb+ArrayList<E> allPairsDeduplication()+\\
+where \verb+E+ can be substituted with the specific object you have created to store a single row.
+\end{enumerate}
+
+\paragraph{Hash Table Deduplication}
+Another way to find the number of duplicates is to create a key for each item in the data set and insert these items into a HashMap, with the count of the number of times this item is seen as the value. The choice of key will determine whether two items are considered to be duplicates, so choose it carefully.
+
+%%% TODO: clean this up and figure out if they should actually implement DoubleHashMap
+%
+%\item Create a method that uses this hashtable-based method of deduplication to return the number of duplicate items in a given data set. You may use the \verb+ProbeHashMap.java+ from the book. You program should first creates a \verb+ProbeHashMap+ and then insert the items into that hash table.
+%
+%Besides the number of duplicates, also collect the following statistics about hashing: average number of probes during insertions, max number of probes during insertions and load factor after insertions.
+%
+%\item Now implement a \verb+DoubleHashMap+ class which extends \verb+AbstractHashMap+ and repeat the above. Note that you will need to define a secondary hash function for this part. The number of duplicates should clearly stay the same, but did the hashing statistics change? Discuss in your README  
+
+\begin{enumerate}[start=2]
+\item Create a method that uses this hashtable-based method of deduplication to return a list of non-duplicate items in a given data set. You may use the \verb+ProbeHashMap.java+ from the book, also included in your starter files. Your program should first create a \verb+ProbeHashMap+ with the capacity \verb+1,000,003+ and then insert the items into this hash table. 
+
+The deduplication method signature should be:\\
+\verb+ArrayList<E> hashLinearDeduplication()+\\
+where \verb+E+ can be substituted with the specific object you have created to store a single row. 
+
+Besides the list of non-duplicates, also collect the following statistics about hashing: average number of probes during insertions, max number of probes during insertions, and load factor after insertions. Note that you will need to update \verb+ProbeHashMap+ class to compute these values. Print out these statistics once after you have inserted all elements into the hashtable in the following format:
+\begin{verbatim}
+Average number of probes: XXX
+Max number of probes: XXX
+Load factor: XXX
+\end{verbatim}
+
+\end{enumerate}
+
+\paragraph{Sorting for Deduplication}
+The last method for deduplication that we'll look at involves sorting the data in order to check for duplicates.  Note that the comparison method you use will play an important role in determining if you correctly find the duplicates.  First, we'll need some functions that allow us to sort.
+
+\begin{enumerate}[start=3]
+\item Write a method to perform a quicksort on your data.  You may find the fact that you implemented the Comparable interface useful.
+\item Java has a library with an already implemented sort method!  Write a method that uses Collections.sort() to sort your data.
+\item Create two deduplication methods that use these different sorting functions.  The method signatures should be:\\
+\verb+ArrayList<E> quicksortDeduplication()+\\
+\verb+ArrayList<E> builtinSortDeduplication()+\\
+where \verb+E+ can be substituted with the specific object you have created to store a single row.
+\end{enumerate}
+
+\section{Complexity Analysis}
+
+Using the methods you developed from the ``getting started" part of the lab, you'll now explore the complexity of the deduplication methods you've developed in terms of energy consumption.  The answers to these questions should be given in your README file.\\
+
+\textbf{Requirements:}
+\begin{enumerate}
+\item How many seconds does each duplication counting method take when run on the given data set?
+\item How many items (e.g., cups of coffee) could be created by this amount of energy for each duplication counting method?
+\item Create a graph showing the number of rows deduplicated on the x-axis and the energy consumption in number of items on the y-axis for each of these methods (where each method is a series on the graph).  \textbf{Save the graph} as the file \texttt{deduplication.png} in your repository and be sure to \verb+git add+, \verb+git commit+, and \verb+git push+ to submit this graph.
+\item Explain which deduplication method is most efficient in your README, also note which sorting deduplication method (the builtin method or your quicksort method) was more efficient and hypothesize why this might be.
+\end{enumerate}
+
+\section{Command Line Input}
+
+You will receive a voting records file on the command line as a single argument like this:\\
+\verb+SWVF_1_22.txt+\\
+You should process that file as described above and print the following information out in response.
+
+\begin{verbatim}
+Records given:2000
+Attributes checked:X,Y,Z
+Duplicates found:100
+\end{verbatim}
+
+\noindent where in this example you were given 2000 lines of voting records, determined equality based on attributes X, Y, and Z, and found 100 duplicates in the data (i.e., deduplication returned a list of length 1900).  Note that we may choose to test your work using data from different counties or a different date, so be sure to actually read the data in from the command line.  Be sure to print out the \emph{exact} name of the attributes checked as given in the first row of the CSV file.\\
+
+\textbf{Requirements:}
+\begin{enumerate}
+\item Read in a CSV file from the command line input.
+\item Deduplicate the data and print out the results formatted as above.
+\end{enumerate}
+
+\section{Extra Credit}
+
+All extra credit should only be done \textbf{after} successful completion of all of the base requirements for this assignment.  The number of points awarded for extra credit will be smaller than those for completion of the base requirements and the extra credit is designed to be \emph{harder} than those basic requirements as well.  You may choose which of the extra credit options below to pursue and can receive credit for some and not others where that makes sense.  \emph{If you implement any of these options, identify the work that you did in the README file.}
+
+\begin{enumerate}
+\item Implement a \verb+DoubleHashMap+ class which extends \verb+AbstractHashMap+ and implements a hash table that supports double hashing on collision. Note that you will need to define a secondary hash function for this part. Then create a \verb+DoubleHashMap+ and repeat the above. 
+
+The deduplication method signature should be:\\
+\verb+ArrayList<E> hashDoubleDeduplication()+\\
+where \verb+E+ can be substituted with the specific object you have created to store a single row. 
+
+Did the hashing statistics change in comparison to the linear probing hashtable? Discuss in your README.  
+
+\item Implement quicksort using an in-place method.
+\end{enumerate}
+
+
+\end{document}
