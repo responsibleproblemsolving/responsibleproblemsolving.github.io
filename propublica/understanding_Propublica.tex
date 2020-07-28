@@ -1,0 +1,71 @@
+\documentclass[12pt]{article}
+\usepackage{geometry} % see geometry.pdf on how to lay out the page. There's lots.
+\geometry{a4paper} % or letter or a5paper or ... etc
+% \geometry{landscape} % rotated page geometry
+\usepackage{url}
+\usepackage[hyphenbreaks]{breakurl}
+\def\UrlBreaks{\do\/\do-} % a bit of magic from https://norwied.wordpress.com/2012/07/10/how-to-break-long-urls-in-bibtex/
+\usepackage{hyperref}
+
+\title{Data Structure Design}
+%\author{Haverford CS 106 - Introduction to Data Structures}
+\date{Understanding the Propublica Article} % delete this line to display the current date
+
+%%% BEGIN DOCUMENT
+\begin{document}
+\maketitle
+
+\section{Reading the Propublica Article}
+The data we'll be working with comes from a ProPublica story about a risk assessment tool called COMPAS.
+\newline \\
+In order to understand the data, start by reading the ProPublica article:
+\begin{itemize}
+\item \url{https://www.propublica.org/article/machine-bias-risk-assessments-in-criminal-sentencing}
+\end{itemize}
+and the document describing how they did their analysis:
+\begin{itemize}
+\item \url{https://www.propublica.org/article/how-we-analyzed-the-compas-recidivism-algorithm} \\
+\end{itemize}
+Focus more on the first article which is crucial in understanding the context and therefore the dataset. For the analysis document, do not worry about the sophisticated graphs and statistics. However, you should give special attention to the contingency table that analyzes the COMPAS recidivism score for non-violent offenses and the paragraphs around it.
+
+\section{Clarification on the Chart and the Analysis}
+Here are some important things you should note about the chart \textit{Prediction Fails Differently for Black Defendants}
+\begin{itemize}
+\item The chart is connected to the contingency table described above. Can you see how?
+\item ``Higher risk" consists of all scores that are not considered ``low". ``Lower risk" consists only of ``low" scores.
+
+\pagebreak
+
+\item Though the chart labels the rows as
+	\begin{quote}
+	``Labeled Higher Risk, But Didn't Re-Offend" and \\
+	``Labeled Lower Risk, Yet Did Re-Offend",
+	\end{quote}
+	it should respectively be understood more as 
+	\begin{quote}
+	``Out of those that did not re-offend, this percentage was labeled higher risk" (simply put: ``Didn't reoffend but labeled higher risk") and  \\
+	``Out of those that did re-offend, this percentage was labeled lower risk". (simply put: ``Did reoffend but labeled lower risk")
+	\end{quote}
+\item The percentages in the chart are calculated out of that specific race and not out of all races.
+\item Combining two points above, consider the following example which explains the 23.5\% in the chart.
+	\begin{itemize}
+	\item The 23.5\% means that out of only the \textit{white} defendants who did not re-offend, 23.5\% of them were labeled as ``higher risk".
+	\item It does \textbf{not} mean that out of defendants of \textit{all races} who did not re-offend, white defendents make up 23.5\% of those that were labeled ``higher risk".
+	\end{itemize}
+\end{itemize}
+The following explains in more depth some of the terminology from contingency table mentioned earlier:
+\begin{itemize}
+\item The chart uses the term ``survived" to describe those who did not re-offend within 2 years of being rated ``at higher risk" to recidivate.
+\item FP (false positive) rate refers to the number of people who were rated high and did not re-offend out of the total number of defendants who survived regardless of their COMPAS score:
+	\begin{itemize}
+	\item For example, the FP rate for all defendants was calculated by 
+		\begin{eqnarray*} \frac{\mbox{All defendants who were rated high and did not re-offend}}{\mbox{All defendents who did not reoffend}} = \frac{1282}{1282+2681} \end{eqnarray*}
+	\end{itemize}
+\item FN (false negative) rate refers to the number of people who were rated low and recidivated out of the total number of defendants who recidivated regardless of their COMPAS score:
+	\begin{itemize}
+	\item For example, the FN rate for all defendants was calculated by
+		\begin{eqnarray*} \frac{\mbox{All defendants who recidivated and rated low}}{\mbox{All defendents who recidivated}} = \frac{1216}{1216+2035} \end{eqnarray*}
+	\end{itemize}
+
+\end{itemize}
+\end{document}

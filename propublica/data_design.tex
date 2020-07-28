@@ -1,0 +1,156 @@
+\documentclass[12pt]{article}
+\usepackage{geometry} % see geometry.pdf on how to lay out the page. There's lots.
+\geometry{a4paper} % or letter or a5paper or ... etc
+% \geometry{landscape} % rotated page geometry
+\usepackage{url}
+\usepackage[hyphenbreaks]{breakurl}
+\def\UrlBreaks{\do\/\do-} % a bit of magic from https://norwied.wordpress.com/2012/07/10/how-to-break-long-urls-in-bibtex/
+\usepackage[colorlinks = true,
+            linkcolor = blue,
+            urlcolor  = blue,
+            citecolor = blue,
+            anchorcolor = blue]{hyperref}
+
+\title{Data Structure Design}
+%\author{Haverford CS 106 - Introduction to Data Structures}
+\date{ProPublica Lab - Part 1 (two weeks)} % delete this line to display the current date
+
+%%% BEGIN DOCUMENT
+\begin{document}
+\maketitle
+
+\section{Designing a Data Structure}
+
+\subsection{Understanding the Data}
+When designing any data structure, we first need to understand the details of the data that we will store and what types of queries we may want to make about that data.  For this lab, the data we'll be working with comes from a ProPublica story about a risk assessment tool called COMPAS.
+
+To understand the data and the larger context, look at these sources in order:
+\begin{enumerate}
+\item ProPublica's introductory video: \href{https://youtu.be/17eDz5HA_qI}{https://youtu.be/17eDz5HA\_qI}
+\item Article ``Machine Bias" by Propublica: \href{https://www.propublica.org/article/machine-bias-risk-assessments-in-criminal-sentencing}{https://www.propublica.org/article/\newline machine-bias-risk-assessmentsin-criminal-sentencing}
+\item Handout ``Lab 1: Understanding Propublica.pdf"
+\item Video: \href{http://sorelle.friedler.net/riskassessmentsintro.mp4}{``Context of Risk Assessment Tools"}
+\item Look at the (cleaned) data in ``compas-scores.csv". 
+\end{enumerate}
+%
+Feel free to discuss the content with peers and/or instructors. % if you have any trouble understanding the content.
+
+\subsection{Creating a Class Representing a Single Row}
+\subsubsection{Create a class}
+Think about what a single row in the CSV represents.  Create a class that holds information about a single row.  Be sure to name it meaningfully based on your understanding of what the single row represents.  Feel free to discuss with your peers or instructors what a meaningful name should be.
+
+Using javadoc style, write a comment to describe the class - what it represents, what contents it holds, etc.
+
+\subsubsection{Fields and methods}
+\label{fields}
+Add necessary fields to represent the information about what the class represents based on the CSV - think about its columns!  Think carefully about what the most appropriate data type of these fields should be; you should include \texttt{enum}s as a possibility but make sure they are an appropriate data type - e.g. you should not make everything be \texttt{enum} or \texttt{String}.
+
+After you have created the fields, add any necessary getter and setter methods to the class.
+
+Be sure to use appropriate coding style and add appropriate Javadoc comments.
+
+\subsubsection{Constructor}
+We now need to make the class accept data from outside to initialize the fields you created in Section \ref{fields}. Make a constructor that takes in multiple variables (e.g. \texttt{String sex}, \texttt{String race}, \texttt{...}) and initializes the fields of your class.
+
+\subsubsection{Test your class}
+\label{test}
+Testing is an important part of developing data structures. In the \texttt{Main} class, make a \texttt{testObject()} method that makes an instance of the class and tests your getter and setter methods. 
+
+Call your \texttt{testConstructor()} method in your \texttt{main} method of your \texttt{Main} class to test your work. For example, your class should look similar to the following, where \emph{ClassName} is the name of the class you created in this section:
+\begin{verbatim}
+import org.junit.Assert;
+
+public class Main {
+    public static void main(String[] args) {
+        testConstructor();
+    }
+    
+    public static void testConstructor() {
+        // construct an object
+        ClassName meaningfulName = new ClassName(String sex, ...);
+        
+        // test the getter method for the sex field
+        // assertEquals will return no output if the Strings are equal
+        // otherwise, it will throw an Exception
+        Assert.assertEquals(sex, meaningfulName.getSex())
+        
+        // other tests here
+    }
+}
+
+\end{verbatim}
+You can also test your work using \texttt{System.out.println} to print variables, but if you do so please declutter the console output by commenting out these calls once you're sure it works.
+
+%We want to see that you tested your work. Without removing the evidence that you tested your work, declutter the console output by commenting out the method call for \texttt{testObject()} in your \texttt{main} method after you thoroughly test your work.
+
+Continue to test your work in the following section similar to how you did here.
+
+\subsection{Getting ready to Replicate the Analysis}
+The goal of this lab is to get ready to replicate ProPublica's analysis shown in the table \textit{Prediction Fails Differently for Black Defendants}.  In the next lab, you'll do the actual replication.  To prepare the data structures appropriately and understand the analysis you'll be working towards, make sure you have read the article \href{https://www.propublica.org/article/machine-bias-risk-assessments-in-criminal-sentencing}{``Machine Bias"} by ProPublica and the handout ``Lab 1: Understanding Propublica.pdf".
+
+In order to do this, we need to determine if the person represented by the row fits the description in the table. For example, to see if someone is part of the 25.3\% in the table, we need to check
+\begin{enumerate}
+    \item if the person is white (or Caucasian)
+    \item if the person did not re-offend (i.e., was not labeled as being rearrested within 2 years)
+    \item if the person was labelled ``high risk"
+\end{enumerate}
+
+More generally, we need to check the person's race (white or Black), whether they re-offended, and whether they were labelled ``low risk" or ``high risk" of recidivism. Make these methods that return \texttt{true} or \texttt{false} depending on whether a person fits this criteria: \texttt{isWhite()}, \texttt{isBlack()}, \texttt{hasReoffended()}, \texttt{isLowRisk()}, and \texttt{isHighRisk()}.
+
+You will use these methods in the next lab to determine things like (from ``Lab 1: Understanding Propublica")
+\begin{verbatim}
+    out of only the white defendants who did not reoffend,
+    23.5% of them were labeled as "high risk"
+\end{verbatim}
+to calculate whether a person should be counted for that 23.5\% of white people who did not re-offend, but were labelled ``high risk".  Since this lab deals with only one row of the data, we will not be able to replicate the chart yet.
+
+Make sure you follow appropriate coding practices, update and maintain appropriate comments about the class and the methods, and test your work.  Please name your testing method \texttt{testBools()} and follow instructions as described in Section \ref{test}.
+
+\section{Data Validation}
+To help us read the data from the CSV into our data structure in the next lab, we need to make some modifications. Specifically, we need to make a new constructor and put safe guards in place about what can be passed into the constructor.
+
+\subsection{New Constructor}
+In the next lab, we will read each row of the CSV as String arrays.
+
+Do not get rid of the original constructor. In Java, we can ``overload" methods - meaning the methods can have the same name as long as their parameters are different.  Java compiler will \emph{automatically} look for the method that fits the one you're calling.
+
+Create a second constructor for the class that takes in a String array and initializes the fields. The indices of the array will correspond to the column of the row.
+
+Please follow testing descriptions from Section \ref{test}. In testing your work, please name your method \texttt{testStringArrConstructor()}.
+To simulate testing, you can use the following syntax to create a new String array:
+\begin{verbatim}
+    public static void testStringArrConstructor() {
+        String[] row1 = new String[] {"Male", "Other", "F",
+            "Aggravated Assault w/Firearm", "1", "Low", "0", "", ""};
+        ClassName meaningfulName = new ClassName(row1);
+        
+        // more code to write for testing
+    }
+\end{verbatim}
+
+\subsection{Safe-guarding the constructor}
+We should put some safeguards in place to make sure that we don't have any data errors when we do the imports from the CSV.
+
+\subsubsection{What are the valid values?}
+Determine what the valid options are for each field in your class - you'll likely want to look at ``compas-scores.csv" again.  Use Javadoc style to document these preconditions.
+
+\subsubsection{Are the values valid?}
+Within the constructor, perform a check before initializing the fields to ensure the fields only hold valid values that you just determined. Invalid values should throw an exception.
+
+Make sure that tests you do deals with exceptions - surround your test method in try-catch block.  This applies for \emph{all} tests you've written for this lab.  Remember that your Main class should never throw an exception - it should be handling them!
+
+\subsubsection{Discuss!}
+Talk to someone else in the class and discuss what pre-conditions they decided for each of their fields. How do they compare to yours? Feel free to update any pre-conditions in the comments and (if any) document any potential disagreements with the people you talked to.
+
+\subsubsection{Test!}
+You're a good programmer, so you test what you do as you go. Check that your pre-conditions work by passing a String array with valid values and some with invalid values.
+
+\subsection{Optional: \texttt{toString()} and \texttt{equals()} methods}
+If you try to print an object, Java will output the memory address of the object.  
+However, this doesn't tell us much and makes it difficult to see what the object is like.
+To make meaningful print statements, override the \texttt{toString()} method to show some of the fields. You can do this by simply creating a method in the class with the precise signature: \texttt{public String toString()}
+%We suggest that the object's information is on only one line.
+
+Similarly, the \texttt{equals()} method, used by \texttt{assertEquals} to determine equality between objects, can be overridden for the new object you have created.  Create a method in the class with the signature: \texttt{public boolean equals(Object o)}.  The method should return \texttt{true} if the objects are equal and \texttt{false} if not.  You will need to cast the given object to the same type as your created task before you can check equality of the individual fields.
+
+\end{document}
