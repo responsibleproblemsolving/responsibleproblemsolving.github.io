@@ -1,0 +1,163 @@
+
+<link href='../markdown.css' rel='stylesheet'></link>
+
+<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]}
+  });
+</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - -->
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lab5_bintrees</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="cs106-lab-5-binary-trees">Binary Trees</h1>
+<hr />
+<h2 id="overview">Overview</h2>
+<p>For this assignment we will be working polling data for the upcoming 2020 U.S. presidential election. Before the two main political parties put forward their nominees for president, the Democratic and Republican parties hold primary elections to determine who their nominee will be. The Republican nominee is essentially predetermined to be President Trump. The Democratic party is converging on a decision, but over the past year or so, the outcome has been very uncertain. In order to make repeated predictions about the likely outcome of the Democratic party nomination, pollsters (statisticians) regularly conduct polls (surveys) to sample Democratic primary voters and ask who they plan to vote for. These results are compiled, released, and eagerly tracked by the news media and public to determine which candidate currently has the largest percentage of support.</p>
+<p>In this assignment, your job will be to take the poll results given as input via CSV files and update the entries of a binary tree so that it stores the name and current polling percentage for each candidate. There is an optional part at the end to look at the “evolution” of the candidates over time.</p>
+<hr />
+<h2 id="part-1-implementing-a-binary-tree">Part 1: Implementing a Binary Tree</h2>
+<p>You should start by implementing the given <code>BinaryTree</code> interface as a <code>LinkedBinaryTree</code> so that generic objects that implement the <code>compareTo</code> method from the <code>Comparable</code> interface can be inserted into your tree. Requirements are shown below, and then some tips for each method.</p>
+<h3 id="requirements">Requirements</h3>
+<ol type="1">
+<li><p>Implement the <code>BinaryTree</code> interface as a <code>LinkedBinaryTree</code>. Make sure the implementation is entirely recursive and is a linked data structure, i.e., you should not use any for or while loops, arrays, <code>ArrayList</code>s, etc. <em>Hint: you may find it useful to use private or public helper methods that are called from the publicly defined methods in the interface.</em> Note that the data structure itself should be recursive. In other words, <strong>the left and right children of a tree should themselves be trees.</strong> You should not have a <code>Node</code> class.</p></li>
+<li><p>Your implementation should be properly encapsulated, i.e. no implementation details should be made visible outside of the <code>LinkedBinaryTree</code> class. The user should not need additional methods to use the methods in <code>BinaryTree</code> interface (even if you implement extra public methods).</p></li>
+<li><p>Insertion should be done using the <code>compareTo</code> method of the given element so that smaller elements are put into the left subtree and larger element are put into the right subtree. Insertion of elements that are already in the tree should <em>replace</em> the current element. When you put your polling data into the tree this will be equivalent to updating the poll numbers for a candidate. (In reality we should also delete candidates who have dropped out, but we’ll omit this for now unless you do the optional extension.)</p></li>
+<li><p>As part of implementing the <code>BinaryTree</code> interface you will implement all three orders for tree traversal. Your returned string should be in the form:</p></li>
+</ol>
+<pre><code>element1 element2  ... elementn</code></pre>
+<p>Where the order is determined by the correct order for the specific traversal. Note that these methods should also use a recursive design. There should be one space between each element. This can be a bit tricky - look up the <code>trim()</code> method for <code>String</code>s, which may help.</p>
+<ol start="5" type="1">
+<li>You should <code>Override</code> the <code>toString</code> method to return a <code>String</code> that looks like the following (use <code>\t</code> for tab):</li>
+</ol>
+<pre><code>Tree:
+Pre:    b a c
+In:     a b c
+Post:   a c b</code></pre>
+<p>Where the first traversal is a pre-order traversal, the second is in-order, and the last is post-order.</p>
+<h3 id="method-summary">Method Summary</h3>
+<ul>
+<li><p>Constructor: think back to what we did for our <code>Node</code> constructors (in terms of how to initialize the left and right trees of “this” tree). Before any elements are inserted, it’s okay for the data to be null.</p></li>
+<li><p><code>void insert(E element)</code>: should be fully recursive. <em>Hint: you may need to initialize the left and right trees as data is added.</em></p></li>
+<li><p><code>E getRootElement()</code></p></li>
+<li><p><code>int size()</code>: many ways to do this. Think about the pros and cons of maintaining an instance variable vs. computing size each time. <em>Hint: no loops!</em></p></li>
+<li><p><code>boolean isEmpty()</code></p></li>
+<li><p><code>String toStringInOrder()</code>: should be fully recursive. <em>Hint: look up the trim method for strings.</em></p></li>
+<li><p><code>String toStringPreOrder()</code>: same advice as in-order.</p></li>
+<li><p><code>String toStringPostOrder()</code>: same advice as in-order.</p></li>
+</ul>
+<h3 id="examples">Examples</h3>
+<p>These examples are based on our in-class examples (second one is not exactly the same since it wasn’t sorted in class).</p>
+<pre><code>// testing in main
+BinaryTree&lt;Integer&gt; intTree = new LinkedBinaryTree&lt;Integer&gt;();
+intTree.insert(8);
+intTree.insert(11);
+intTree.insert(5);
+intTree.insert(17);
+intTree.insert(1);
+intTree.insert(9);
+intTree.insert(3);
+System.out.println(intTree);</code></pre>
+<pre><code>// output
+Tree:
+Pre:    8 5 1 3 11 9 17
+In:     1 3 5 8 9 11 17
+Post:   3 1 5 9 17 11 8</code></pre>
+<pre><code>// testing in main
+BinaryTree&lt;Character&gt; letterTree = new LinkedBinaryTree&lt;Character&gt;();
+letterTree.insert(&#39;A&#39;);
+letterTree.insert(&#39;C&#39;);
+letterTree.insert(&#39;G&#39;);
+letterTree.insert(&#39;B&#39;);
+letterTree.insert(&#39;D&#39;);
+letterTree.insert(&#39;G&#39;); // inserting again, should replace
+letterTree.insert(&#39;F&#39;);
+letterTree.insert(&#39;E&#39;);
+letterTree.insert(&#39;H&#39;);
+letterTree.insert(&#39;I&#39;);
+System.out.println(&quot;size:&quot; + letterTree.size());
+System.out.println(letterTree);</code></pre>
+<pre><code>// output
+size:9
+Tree:
+Pre:    A C B G D F E H I
+In:     A B C D E F G H I
+Post:   B E F D I H G C A</code></pre>
+<hr />
+<h2 id="part-2-storing-polling-data">Part 2: Storing Polling Data</h2>
+<p>The polling data you are given will include the candidate’s full name, their last name, and the percentage of the people polled who said they would vote for that candidate.</p>
+<h3 id="requirements-1">Requirements</h3>
+<ol type="1">
+<li><p>Create a class to store one row of the polling data (think about an appropriate name for this class).</p></li>
+<li><p>Have your created class implement the <code>Comparable</code> interface so that polling data objects are put in order based on the candidate’s <em>last</em> name.</p></li>
+<li><p>Override the <code>toString</code> method to return a <code>String</code> with the following formatting (for example):</p></li>
+</ol>
+<pre><code>Elizabeth Warren:17.4</code></pre>
+<p>where full name is first, then a colon, then the candidate’s polling percentage.</p>
+<hr />
+<h2 id="part-3-getting-polling-data-from-csvs">Part 3: Getting Polling Data from CSVs</h2>
+<p>The website <a href="https://data.fivethirtyeight.com/">FiveThirtyEight</a> makes polling data for presidential primary candidates available. We have preprocessed this data for you so that only the relevant data is included and you will receive one file per conducted poll.</p>
+<p>Each polling data CSV has the following format:</p>
+<pre><code>answer,candidate,pct
+Bennet,Michael F. Bennet,1.3
+Biden,Joseph R. Biden Jr.,23.8
+Bloomberg,Michael Bloomberg,1.8
+Buttigieg,Pete Buttigieg,8.1
+Gabbard,Tulsi Gabbard,3.1
+Klobuchar,Amy Klobuchar,4.2
+Patrick,Deval Patrick,0.0
+Sanders,Bernard Sanders,30.8
+Steyer,Tom Steyer,0.0
+Warren,Elizabeth Warren,17.4
+Yang,Andrew Yang,0.7</code></pre>
+<p>The first column gives the last name of the candidate, the second column gives the candidate’s full name, and the final column is the percent the candidate is polling at in this poll. Note that the given percent can be a floating-point number. Recall from previous labs that you can read in data from a file using the OpenCSV library <code>CSVReaderHeaderAware</code>. You should feel free to do that for this lab as well.</p>
+<p>Each file is named something like <code>dempres_20190310_1.csv</code> where <code>dempres</code> indicates that these are polling results for the Democratic party presidential primary, <code>20190310</code> indicates that the polling results were completed on March 10, 2019, and <code>_1</code> indicates that these are the results for the first poll completed on that date (there may be multiple from different sources). I have included about one file for each month, so you can see the evolution of the candidates.</p>
+<p>Your job is to take the polling data in each file and insert it into the binary tree. Your resulting tree should contain the polling data for each candidate from the most recent date for which there is data from the files given on the command line. Each polling result will only include some of the candidates.</p>
+<h3 id="requirements-2">Requirements:</h3>
+<ol type="1">
+<li>Take filename input from the command line into the main method of your Main.java. You may be given multiple filenames. An example of given arguments might be:</li>
+</ol>
+<p><font color=blue>Edit: please add poll_data if you can!</font></p>
+<pre><code>poll_data/dempres_20190103_1.csv poll_data/dempres_20190202_1.csv poll_data/dempres_20190302_1.csv</code></pre>
+<p><font color=blue>Edit: output from the above example</font></p>
+<pre><code>Tree:
+Pre:    Bernard Sanders:21.1 Joseph R. Biden Jr.:37.0 Beto O&#39;Rourke:5.0 Joseph Kennedy III:9.0 Kamala D. Harris:9.0 Hillary Rodham Clinton:3.0 Cory A. Booker:5.9 Michael Bloomberg:1.9 Sherrod Brown:0.9 Steve Bullock:0.0 Julián Castro:0.2 Pete Buttigieg:0.4 Kirsten E. Gillibrand:3.3 Andrew Cuomo:0.0 John K. Delaney:0.0 Eric Garcetti:0.0 Tulsi Gabbard:1.5 John Hickenlooper:1.0 Jay Robert Inslee:0.0 Eric H. Holder:0.0 John Kerry:1.0 Amy Klobuchar:0.9 Terry R. McAuliffe:0.0 Gavin Newsom:0.0 Richard Neece Ojeda:1.0 Elizabeth Warren:5.2 Tom Steyer:1.0 Howard Schultz:0.0 Eric Swalwell:0.0
+In:     Joseph R. Biden Jr.:37.0 Michael Bloomberg:1.9 Cory A. Booker:5.9 Sherrod Brown:0.9 Steve Bullock:0.0 Pete Buttigieg:0.4 Julián Castro:0.2 Hillary Rodham Clinton:3.0 Andrew Cuomo:0.0 John K. Delaney:0.0 Tulsi Gabbard:1.5 Eric Garcetti:0.0 Kirsten E. Gillibrand:3.3 Kamala D. Harris:9.0 John Hickenlooper:1.0 Eric H. Holder:0.0 Jay Robert Inslee:0.0 Joseph Kennedy III:9.0 John Kerry:1.0 Amy Klobuchar:0.9 Terry R. McAuliffe:0.0 Gavin Newsom:0.0 Beto O&#39;Rourke:5.0 Richard Neece Ojeda:1.0 Bernard Sanders:21.1 Howard Schultz:0.0 Tom Steyer:1.0 Eric Swalwell:0.0 Elizabeth Warren:5.2
+Post:   Michael Bloomberg:1.9 Pete Buttigieg:0.4 Julián Castro:0.2 Steve Bullock:0.0 Sherrod Brown:0.9 Cory A. Booker:5.9 Tulsi Gabbard:1.5 Eric Garcetti:0.0 John K. Delaney:0.0 Andrew Cuomo:0.0 Kirsten E. Gillibrand:3.3 Hillary Rodham Clinton:3.0 Eric H. Holder:0.0 Jay Robert Inslee:0.0 John Hickenlooper:1.0 Kamala D. Harris:9.0 Gavin Newsom:0.0 Terry R. McAuliffe:0.0 Amy Klobuchar:0.9 John Kerry:1.0 Joseph Kennedy III:9.0 Richard Neece Ojeda:1.0 Beto O&#39;Rourke:5.0 Joseph R. Biden Jr.:37.0 Howard Schultz:0.0 Eric Swalwell:0.0 Tom Steyer:1.0 Elizabeth Warren:5.2 Bernard Sanders:21.1</code></pre>
+<ol start="2" type="1">
+<li><p>You should process the given files in increasing date order. You may assume that the files are given in this order.</p></li>
+<li><p>Use your overridden <code>toString</code> method to print the tree <em>after polling results from each new date are inserted</em>. Thus, your resulting printed information should include one snapshot of the tree per given polling data CSV. <font color=blue>Edit: you can just print the final tree at the end of all the files. Either way is fine, we’ll just be looking for the final tree somewhere in your output.</font></p></li>
+</ol>
+<hr />
+<h2 id="part-4-runtime-analysis">Part 4: Runtime Analysis</h2>
+<p>Answer the runtime analysis questions in the README.</p>
+<hr />
+<h3 id="extensions">Extensions</h3>
+<p><strong>Optional (not Extra Credit but for additional practice)</strong></p>
+<ol type="1">
+<li><p>Implement a boolean <code>remove(E element)</code> operation for the <code>LinkedBinaryTree</code>. It should return <code>true</code> if the element was in the tree and successfully removed and <code>false</code> if given an element that is not in the tree. You should be sure that this method works seamlessly with the other methods. For example, an in-order traversal should return a string containing the remaining elements in sorted order even after an element has been removed. Describe your chosen design for this method in the README.</p></li>
+<li><p>In cases where you are given multiple polling results on the same date, average the per-candidate results before inserting the data into the tree. i.e., if Biden received 25% in one poll and 31% in another poll from the same date, the inserted polling result should show Biden receiving 28% of the vote.</p></li>
+<li><p>Make sure that the polls are processed in date order no matter what order they are given to you in on the command line.</p></li>
+<li><p>The given CSV files cover a long stretch of time - use your code (+ additional code) to analyze the evolution of the candidates (i.e. you could plot of the number of promising candidates over time, or look for indications that a candidate was going to drop out, etc). Write up your analysis in your README.</p></li>
+</ol>
+</body>
+</html>
