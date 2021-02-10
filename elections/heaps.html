@@ -1,0 +1,879 @@
+
+<link href='../markdown.css' rel='stylesheet'></link>
+
+<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]}
+  });
+</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - -->
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lab6_heaps</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="cs106-lab-6-heaps">CS106 Lab 6: Heaps</h1>
+<hr />
+<h2 id="overview">Overview</h2>
+<p>For this assignment, you’ll continue your previous investigation of Democratic primary polling data by using a heap to sort the candidates by their polling numbers (to determine which candidates are currently in the lead).</p>
+<hr />
+<h2 id="part-1-implementing-a-heap">Part 1: Implementing a Heap</h2>
+<p>You should start by implementing the given <code>PriorityQueue</code> interface as an <code>ArrayHeap</code> so that generic objects that implement the <code>compareTo</code> method from the <code>Comparable</code> interface can be inserted into your priority queue. Requirements are shown below, and then some tips for each method.</p>
+<h3 id="requirements">Requirements</h3>
+<ol type="1">
+<li><p>Implement the <code>PriorityQueue</code> interface as an <code>ArrayHeap</code> with the maximum at the top. Unlike last week when we were using recursion, you’re encouraged to use loops in your heap implementation. <em>You may find it useful to use private or public helper methods that are called from the publicly defined methods in the interface.</em> However, you still do not need a <code>Node</code> class - the entire data structure will be contained within the <code>ArrayHeap</code> class.</p></li>
+<li><p>You should use the <code>compareTo</code> method of the given element to determine which values are greater or less within the priority queue. <em>For this week, we will only read one file so we do not need to deal with duplicate entries.</em> In general there is not a problem with having duplicate entries in a heap, but we’ll avoid this by just using one file. Since this heap will be used to store polling data, you should be implementing this as a maximum heap, so that we will be able to easily retrieve the current top candidate.</p></li>
+</ol>
+<p>Last week we used the candidate’s last name to determine ordering. For this week, copy over your <code>Candidate</code> class (or whatever you called it) and modify the <code>compareTo</code> method to instead first compare the candidate’s <strong>polling numbers</strong>. If there is a tie, then use the candidate’s last names (still A-&gt;Z).</p>
+<ol start="3" type="1">
+<li>You should <code>Override</code> the <code>toString</code> method in your <code>ArrayHeap</code> class to return a <code>String</code> representation of the heap for debugging and autograding purposes. For example, if I add the following numbers to a new heap one by one:</li>
+</ol>
+<pre><code>-2, 3, 9, -7, 1, 2, 6, -3</code></pre>
+<p>and then print the heap, I will get something like this:</p>
+<pre><code>9
+1 6
+-3 -2 2 3
+-7</code></pre>
+<p>where each line represents one level of the heap. So 9 is at the root (maximum of all the numbers). It has children 1 and 6. The children of 1 are -3 and -2. The children of 6 are 2 and 3. -3 has one child in the last level: -7.</p>
+<h3 id="method-summary">Method Summary</h3>
+<ul>
+<li><p><strong>Constructor and instance variables</strong>: you should have only one instance variable, the array representing the heap. Since we do want to be able to add elements (thus resizing the array), we will use an <code>ArrayList</code> for this array. You should have one constructor that takes in no arguments (we will add another constructor later).</p></li>
+<li><p><code>int size()</code></p></li>
+<li><p><code>boolean isEmpty()</code></p></li>
+<li><p><code>E max()</code>: return the root of the heap. If the heap is empty, you can either return <code>null</code> or throw an exception.</p></li>
+<li><p><code>void insert(E element)</code>: first add the element to the end of the array. Then we need to “bubble up” the element until we have “re-heapified” our data structure. You do not need to deal with duplicates (i.e. if you add the same element twice, it will appear twice in the heap). Suggested helper methods:</p>
+<ul>
+<li><p><code>swap</code>: this could either take in one index (the index of the child) and then find the parent index and swap the data in these two positions. Or it could take in both indices (i.e. a parent index and a child index). Make sure you work with indices though, otherwise you will have to go searching for the element, which is slow.</p></li>
+<li><p><code>parent</code>: takes in a child index and returns the index of the parent</p></li>
+<li><p><code>leftChild</code>: takes in the index of a parent and returns the index of their left child (note that this could be off the end of the array)</p></li>
+<li><p><code>rightChild</code>: takes in the index of a parent and returns the index of their right child (note that this could be off the end of the array)</p></li>
+<li><p><code>bubbleUp</code>: this should bubble up the element at the given index</p></li>
+</ul></li>
+<li><p><code>toString()</code>: this method should print out each level of the tree (as shown above). To write this you can loop through the elements of the array, adding a new line whenever you reach a new power of 2. <em>You can begin testing this method by printing out the <code>ArrayList</code> directly.</em></p></li>
+<li><p><code>E removeMax()</code>: wait to write this until you have tested <code>insert</code> and <code>toString</code> (see examples below). Remove max should save the root element to return later. Then put the last element in the heap at the root and “bubble down” until the heap is re-heapified. To do this exchange this new parent element with the larger of its children until it is in the right place, or back at the end. I would recommend adding a <code>bubbleDown</code> method.</p></li>
+</ul>
+<h3 id="examples">Examples</h3>
+<p>These examples show the heap creation process (not removal). Put this testing (as well as additional testing of the other methods) in a separate helper method in main.</p>
+<p>Example 1:</p>
+<pre><code>// testing in Main
+Integer[] arr = {-2,3,9,-7,1,2,6,-3};
+
+// TODO: create a new heap of Integers
+// TODO: use a for loop to insert the elements above into the heap
+
+System.out.println(heap);</code></pre>
+<pre><code>// output
+9
+1 6
+-3 -2 2 3
+-7</code></pre>
+<p>Example 2:</p>
+<pre><code>// testing in Main
+ArrayHeap&lt;Character&gt; letterHeap = new ArrayHeap&lt;Character&gt;();
+letterHeap.insert(&#39;A&#39;);
+letterHeap.insert(&#39;C&#39;);
+letterHeap.insert(&#39;G&#39;);
+letterHeap.insert(&#39;B&#39;);
+letterHeap.insert(&#39;D&#39;);
+letterHeap.insert(&#39;G&#39;); // inserting again, will still both copies
+letterHeap.insert(&#39;F&#39;);
+letterHeap.insert(&#39;E&#39;);
+letterHeap.insert(&#39;H&#39;);
+letterHeap.insert(&#39;I&#39;);
+System.out.println(&quot;size:&quot; + letterHeap.size());
+System.out.println(letterHeap);</code></pre>
+<pre><code>// output
+size:10
+I
+H G
+E G C F
+A D B</code></pre>
+<hr />
+<h2 id="part-2-heap-sort-in-place">Part 2: Heap Sort (in-place)</h2>
+<p>In the next part of the assignment, implement Heap Sort <em>in-place</em>. This will sort an array low to high. Then in Part 3 we will see another way to use heaps to sort <em>out-of-place</em> but high to low. Heaps are very versatile. Steps:</p>
+<ol type="1">
+<li>Create a new constructor that takes in an unsorted <code>ArrayList</code>:</li>
+</ol>
+<pre><code>public ArrayHeap(ArrayList&lt;E&gt; array) {
+    ...
+}</code></pre>
+<ol start="2" type="1">
+<li>Inside this constructor, run Phase I of Heap Sort to create a heap out of the array. You can test this part in Main using the code below:</li>
+</ol>
+<pre><code>// create an ArrayList using static method &quot;asList&quot;
+Integer[] arr = {-2,3,9,-7,1,2,6,-3};
+ArrayList&lt;Integer&gt; array = new ArrayList&lt;Integer&gt;(Arrays.asList(arr));
+
+// make a new heap out of the array
+ArrayHeap&lt;Integer&gt; heap = new ArrayHeap&lt;Integer&gt;(array);
+System.out.println(heap); // should print the same heap as before (9, 1 6, ...)</code></pre>
+<ol start="3" type="1">
+<li>In a new method called <code>sort</code> (no arguments, no return), run Phase II of Heap Sort (in-place). Note that this will destroy the heap! And the original order of the array. But it will sort the array <em>in-place</em>. Here is some testing code:</li>
+</ol>
+<pre><code>heap.sort();
+System.out.println(array); // print out the original array, now sorted (below)</code></pre>
+<pre><code>// output
+[-7, -3, -2, 1, 2, 3, 6, 9]</code></pre>
+<hr />
+<h2 id="part-3-heap-sort-of-candidates-using-removemax">Part 3: Heap Sort of Candidates using removeMax</h2>
+<p>We will now use heaps to sort in a different way. Using the polling data from the previous lab, this time read in only one file (to avoid dealing with duplicates). Create a new heap, then add the candidates to the heap one by one. Then, afterward, use <code>removeMax</code> in a loop to remove and print each candidate in turn. This will create a printout of the candidates from highest polling number to lowest polling number.</p>
+<p>Make sure to copy over your <code>Candidate</code> class and change your <code>compareTo</code> method so that polling data objects ordered based on the candidate’s <em>polling number</em> (using last name to break ties).</p>
+<p>Here is an example command line argument:</p>
+<pre><code>poll_data/dempres_20190718_3.csv</code></pre>
+<p>And this is what the output should look like (you’re welcome to include intermediate printouts, but this should be included at some point). </p>
+<pre><code>Joseph R. Biden Jr.:27.0
+Bernard Sanders:20.0
+Elizabeth Warren:18.0
+Kamala D. Harris:12.0
+Pete Buttigieg:7.0
+Beto O&#39;Rourke:2.0
+Tulsi Gabbard:2.0
+Andrew Yang:1.0
+Tom Steyer:1.0
+Amy Klobuchar:1.0
+John Hickenlooper:1.0
+Kirsten E. Gillibrand:1.0
+John K. Delaney:1.0
+Julián Castro:1.0
+Cory A. Booker:1.0
+Bill de Blasio:0.0
+Marianne Williamson:0.0
+Joe Sestak:0.0
+Tim Ryan:0.0
+Seth Moulton:0.0
+Wayne Messam:0.0
+Jay Robert Inslee:0.0
+Mike Gravel:0.0
+Steve Bullock:0.0
+Michael F. Bennet:0.0</code></pre>
+<hr />
+<h2 id="huffman-coding">Huffman Coding</h2>
+<p><strong>Optional (worth a small amount of Extra Credit)</strong></p>
+<p>In this part of the lab, you will create a program that can read and write text expressed using a variable bitrate encoding. Such schemes can be used to compress files so that both storage and transmission consume fewer resources.</p>
+<p>The canonical variable bitrate algorithm is called Huffman coding after its inventor, David Huffman, who as a student at MIT came up with the technique and proved its optimality in response to a homework assignment from his professor. You can read more about the algorithm in its <a href="https://en.wikipedia.org/wiki/Huffman_coding">Wikipedia article</a>. Basically, more common characters are encoded using short bit strings, while rarer characters use much longer bit strings. The savings on the short, common characters more than makes up for the extra bits for the rarely occurring longer characters.</p>
+<p>To avoid confusion, Huffman coding uses a prefix code scheme, meaning that no character’s encoding forms the beginning sequence of any other. So for example, if the code <code>00</code> represents the letter <code>e</code>, then no other code may begin with <code>00</code> – they must all use <code>01</code>, <code>10</code>, or <code>11</code> instead. This ensures that the encoded bit string has a unique interpretation. It also means that the encoding scheme can be conveniently represented using a binary tree, with symbols at the leaves, and the corresponding code for that symbol determined by the path to it from the root. By convention, left branches correspond to a <code>0</code> in the code, and right branches to a <code>1</code>. So if the leaf node for the letter <code>t</code> is reached by going left-right-left from the root, then the code for <code>t</code> would be <code>010</code>.</p>
+<hr />
+<h3 id="implementation-suggestions">Implementation suggestions</h3>
+<p>You will write three files (add all to your source code directory in Lab 6) and two separate programs for this assignment. <em>I would recommend using a linked data structure for this part, not a heap. If you do the last part, you’ll use a priority queue to sort the frequencies.</em></p>
+<ul>
+<li><code>HuffEncode.java</code> this program will take a text file and encode it using the coding below</li>
+<li><code>HuffDecode.java</code> this program will take an encoded file and decode it. (If you encode a file and then decode it again, you should get exactly the same file back.)</li>
+<li><code>HuffTree.java</code> both programs should make use of this class, which contains the tree data structure</li>
+</ul>
+<p>Shown here are the codes you should use for this assignment. Rather than building the coding tree from a particular input as described in the Wikipedia article, your program should build a tree that represents the encoding given here. (But see the optional part below if you want to build a custom tree.) I would recommend that <code>HuffTree.java</code> have its own custom insert method, since you will need to insert each symbol as a leaf into the tree, creating intermediate nodes as you go (note that you do not need explicit edge labels, as left will always mean <code>0</code> and right will always mean <code>1</code>). <em>Hint: draw a picture of the tree as it would look after the first few symbols are inserted.</em> You may also want to store the parent of each node.</p>
+<pre><code>public static final String[] CODES = {&quot;000&quot;, &quot;110&quot;, &quot;0010&quot;, &quot;0011&quot;, &quot;0100&quot;, &quot;0110&quot;, &quot;0111&quot;, &quot;1001&quot;, &quot;1010&quot;, &quot;10000&quot;, &quot;10111&quot;, &quot;11111&quot;, &quot;010100&quot;, &quot;010101&quot;, &quot;010110&quot;, &quot;100010&quot;, &quot;100011&quot;, &quot;101101&quot;, &quot;111000&quot;, &quot;111001&quot;, &quot;111011&quot;, &quot;111100&quot;, &quot;1011000&quot;, &quot;1110100&quot;, &quot;1110101&quot;, &quot;11110110&quot;, &quot;11110111&quot;, &quot;010111101&quot;, &quot;010111111&quot;, &quot;101100100&quot;, &quot;101100101&quot;, &quot;111101000&quot;, &quot;111101010&quot;, &quot;0101110001&quot;, &quot;0101110010&quot;, &quot;0101110011&quot;, &quot;0101110111&quot;, &quot;0101111000&quot;, &quot;0101111001&quot;, &quot;0101111100&quot;, &quot;0101111101&quot;, &quot;1011001101&quot;, &quot;1011001110&quot;, &quot;1011001111&quot;, &quot;1111010010&quot;, &quot;1111010111&quot;, &quot;01011100000&quot;, &quot;01011100001&quot;, &quot;01011101000&quot;, &quot;01011101001&quot;, &quot;01011101011&quot;, &quot;10110011000&quot;, &quot;11110100110&quot;, &quot;11110100111&quot;, &quot;11110101100&quot;, &quot;11110101101&quot;, &quot;010111010101&quot;, &quot;010111011000&quot;, &quot;010111011001&quot;, &quot;010111011010&quot;, &quot;101100110011&quot;, &quot;0101110101000&quot;, &quot;0101110101001&quot;, &quot;0101110110111&quot;, &quot;01011101101100&quot;, &quot;01011101101101&quot;, &quot;10110011001000&quot;, &quot;10110011001011&quot;, &quot;101100110010011&quot;, &quot;1011001100100100&quot;, &quot;1011001100100101&quot;, &quot;1011001100101000&quot;, &quot;1011001100101001&quot;, &quot;10110011001010100&quot;, &quot;10110011001010101&quot;, &quot;10110011001010110&quot;, &quot;101100110010101111&quot;, &quot;10110011001010111011&quot;, &quot;101100110010101110000&quot;, &quot;101100110010101110001&quot;, &quot;101100110010101110010&quot;, &quot;101100110010101110011&quot;, &quot;101100110010101110100&quot;, &quot;101100110010101110101&quot;};
+
+public static final char[] SYMBOLS = {&#39;e&#39;, &#39; &#39;, &#39;s&#39;, &#39;h&#39;, &#39;i&#39;, &#39;n&#39;, &#39;o&#39;, &#39;a&#39;, &#39;t&#39;, &#39;l&#39;, &#39;d&#39;, &#39;r&#39;, &#39;p&#39;, &#39;,&#39;, &#39;y&#39;, &#39;g&#39;, &#39;f&#39;, &#39;w&#39;, &#39;m&#39;, &#39;c&#39;, &#39;\n&#39;, &#39;u&#39;, &#39;v&#39;, &#39;.&#39;, &#39;b&#39;, &#39;\&quot;&#39;, &#39;k&#39;, &#39;-&#39;, &#39;P&#39;, &#39;A&#39;, &#39;T&#39;, &#39;\&#39;&#39;, &#39;I&#39;, &#39;j&#39;, &#39;z&#39;, &#39;q&#39;, &#39;W&#39;, &#39;S&#39;, &#39;R&#39;, &#39;?&#39;, &#39;M&#39;, &#39;B&#39;, &#39;N&#39;, &#39;x&#39;, &#39;!&#39;, &#39;H&#39;, &#39;V&#39;, &#39;;&#39;, &#39;K&#39;, &#39;Y&#39;, &#39;G&#39;, &#39;O&#39;, &#39;F&#39;, &#39;D&#39;, &#39;C&#39;, &#39;E&#39;, &#39;(&#39;, &#39;)&#39;, &#39;X&#39;, &#39;L&#39;, &#39;:&#39;, &#39;*&#39;, &#39;J&#39;, &#39;1&#39;, &#39;2&#39;, &#39;0&#39;, &#39;8&#39;, &#39;U&#39;, &#39;Z&#39;, &#39;7&#39;, &#39;5&#39;, &#39;6&#39;, &#39;3&#39;, &#39;/&#39;, &#39;9&#39;, &#39;Q&#39;, &#39;4&#39;, &#39;[&#39;, &#39;#&#39;, &#39;]&#39;, &#39;%&#39;, &#39;=&#39;, &#39;@&#39;, &#39;$&#39;};</code></pre>
+<p>Recommended key methods inside the <code>HuffTree.java</code> class (more will be needed, but this might help you get started):</p>
+<ul>
+<li><p>empty constructor that makes a new <code>HuffTree</code> but without any symbols</p></li>
+<li><p><code>void addNode(char symbol, String code)</code>: call this for each pair above, this will create a new leaf node (and potentially other nodes along the way)</p></li>
+<li><p><code>String decode(String message)</code>: this will decode a file such as the one below</p></li>
+</ul>
+<p>To test your program, here is a secret file that you will only be able to view when you have completed the decoding program: <a href="mystery_haverford.txt">mystery.txt</a>.</p>
+<h3 id="further-exploration">Further exploration</h3>
+<p>To take this a step further, you can write and demonstrate a method that will build a Huffman coding tree automatically from the distribution of characters in some input file. Note that the exact set of characters in the file will not be known in advance. See this <a href="https://en.wikipedia.org/wiki/Letter_frequency">Letter frequency</a> article for some starting values.</p>
+<p>Codes reproduced in table format below:</p>
+<table style="text-align:center;">
+<tr>
+<th>
+Symbol
+</th>
+<th>
+Code
+</th>
+</tr>
+<tr>
+<td>
+e
+</td>
+<td>
+000
+</td>
+</tr>
+<tr>
+<td>
+(space)
+</td>
+<td>
+110
+</td>
+</tr>
+<tr>
+<td>
+s
+</td>
+<td>
+0010
+</td>
+</tr>
+<tr>
+<td>
+h
+</td>
+<td>
+0011
+</td>
+</tr>
+<tr>
+<td>
+i
+</td>
+<td>
+0100
+</td>
+</tr>
+<tr>
+<td>
+n
+</td>
+<td>
+0110
+</td>
+</tr>
+<tr>
+<td>
+o
+</td>
+<td>
+0111
+</td>
+</tr>
+<tr>
+<td>
+a
+</td>
+<td>
+1001
+</td>
+</tr>
+<tr>
+<td>
+t
+</td>
+<td>
+1010
+</td>
+</tr>
+<tr>
+<td>
+l
+</td>
+<td>
+10000
+</td>
+</tr>
+<tr>
+<td>
+d
+</td>
+<td>
+10111
+</td>
+</tr>
+<tr>
+<td>
+r
+</td>
+<td>
+11111
+</td>
+</tr>
+<tr>
+<td>
+p
+</td>
+<td>
+010100
+</td>
+</tr>
+<tr>
+<td>
+,
+</td>
+<td>
+010101
+</td>
+</tr>
+<tr>
+<td>
+y
+</td>
+<td>
+010110
+</td>
+</tr>
+<tr>
+<td>
+g
+</td>
+<td>
+100010
+</td>
+</tr>
+<tr>
+<td>
+f
+</td>
+<td>
+100011
+</td>
+</tr>
+<tr>
+<td>
+w
+</td>
+<td>
+101101
+</td>
+</tr>
+<tr>
+<td>
+m
+</td>
+<td>
+111000
+</td>
+</tr>
+<tr>
+<td>
+c
+</td>
+<td>
+111001
+</td>
+</tr>
+<tr>
+<td>
+(newline)
+</td>
+<td>
+111011
+</td>
+</tr>
+<tr>
+<td>
+u
+</td>
+<td>
+111100
+</td>
+</tr>
+<tr>
+<td>
+v
+</td>
+<td>
+1011000
+</td>
+</tr>
+<tr>
+<td>
+.
+</td>
+<td>
+1110100
+</td>
+</tr>
+<tr>
+<td>
+b
+</td>
+<td>
+1110101
+</td>
+</tr>
+<tr>
+<td>
+&quot;
+</td>
+<td>
+11110110
+</td>
+</tr>
+<tr>
+<td>
+k
+</td>
+<td>
+11110111
+</td>
+</tr>
+<tr>
+<td>
+-
+</td>
+<td>
+010111101
+</td>
+</tr>
+<tr>
+<td>
+P
+</td>
+<td>
+010111111
+</td>
+</tr>
+<tr>
+<td>
+A
+</td>
+<td>
+101100100
+</td>
+</tr>
+<tr>
+<td>
+T
+</td>
+<td>
+101100101
+</td>
+</tr>
+<tr>
+<td>
+’
+</td>
+<td>
+111101000
+</td>
+</tr>
+<tr>
+<td>
+I
+</td>
+<td>
+111101010
+</td>
+</tr>
+<tr>
+<td>
+j
+</td>
+<td>
+0101110001
+</td>
+</tr>
+<tr>
+<td>
+z
+</td>
+<td>
+0101110010
+</td>
+</tr>
+<tr>
+<td>
+q
+</td>
+<td>
+0101110011
+</td>
+</tr>
+<tr>
+<td>
+W
+</td>
+<td>
+0101110111
+</td>
+</tr>
+<tr>
+<td>
+S
+</td>
+<td>
+0101111000
+</td>
+</tr>
+<tr>
+<td>
+R
+</td>
+<td>
+0101111001
+</td>
+</tr>
+<tr>
+<td>
+?
+</td>
+<td>
+0101111100
+</td>
+</tr>
+<tr>
+<td>
+M
+</td>
+<td>
+0101111101
+</td>
+</tr>
+<tr>
+<td>
+B
+</td>
+<td>
+1011001101
+</td>
+</tr>
+<tr>
+<td>
+N
+</td>
+<td>
+1011001110
+</td>
+</tr>
+<tr>
+<td>
+x
+</td>
+<td>
+1011001111
+</td>
+</tr>
+<tr>
+<td>
+!
+</td>
+<td>
+1111010010
+</td>
+</tr>
+<tr>
+<td>
+H
+</td>
+<td>
+1111010111
+</td>
+</tr>
+<tr>
+<td>
+V
+</td>
+<td>
+01011100000
+</td>
+</tr>
+<tr>
+<td>
+;
+</td>
+<td>
+01011100001
+</td>
+</tr>
+<tr>
+<td>
+K
+</td>
+<td>
+01011101000
+</td>
+</tr>
+<tr>
+<td>
+Y
+</td>
+<td>
+01011101001
+</td>
+</tr>
+<tr>
+<td>
+G
+</td>
+<td>
+01011101011
+</td>
+</tr>
+<tr>
+<td>
+O
+</td>
+<td>
+10110011000
+</td>
+</tr>
+<tr>
+<td>
+F
+</td>
+<td>
+11110100110
+</td>
+</tr>
+<tr>
+<td>
+D
+</td>
+<td>
+11110100111
+</td>
+</tr>
+<tr>
+<td>
+C
+</td>
+<td>
+11110101100
+</td>
+</tr>
+<tr>
+<td>
+E
+</td>
+<td>
+11110101101
+</td>
+</tr>
+<tr>
+<td>
+(
+</td>
+<td>
+010111010101
+</td>
+</tr>
+<tr>
+<td>
+)
+</td>
+<td>
+010111011000
+</td>
+</tr>
+<tr>
+<td>
+X
+</td>
+<td>
+010111011001
+</td>
+</tr>
+<tr>
+<td>
+L
+</td>
+<td>
+010111011010
+</td>
+</tr>
+<tr>
+<td>
+:
+</td>
+<td>
+101100110011
+</td>
+</tr>
+<tr>
+<td>
+*
+</td>
+<td>
+0101110101000
+</td>
+</tr>
+<tr>
+<td>
+J
+</td>
+<td>
+0101110101001
+</td>
+</tr>
+<tr>
+<td>
+1
+</td>
+<td>
+0101110110111
+</td>
+</tr>
+<tr>
+<td>
+2
+</td>
+<td>
+01011101101100
+</td>
+</tr>
+<tr>
+<td>
+0
+</td>
+<td>
+01011101101101
+</td>
+</tr>
+<tr>
+<td>
+8
+</td>
+<td>
+10110011001000
+</td>
+</tr>
+<tr>
+<td>
+U
+</td>
+<td>
+10110011001011
+</td>
+</tr>
+<tr>
+<td>
+Z
+</td>
+<td>
+101100110010011
+</td>
+</tr>
+<tr>
+<td>
+7
+</td>
+<td>
+1011001100100100
+</td>
+</tr>
+<tr>
+<td>
+5
+</td>
+<td>
+1011001100100101
+</td>
+</tr>
+<tr>
+<td>
+6
+</td>
+<td>
+1011001100101000
+</td>
+</tr>
+<tr>
+<td>
+3
+</td>
+<td>
+1011001100101001
+</td>
+</tr>
+<tr>
+<td>
+/
+</td>
+<td>
+10110011001010100
+</td>
+</tr>
+<tr>
+<td>
+9
+</td>
+<td>
+10110011001010101
+</td>
+</tr>
+<tr>
+<td>
+Q
+</td>
+<td>
+10110011001010110
+</td>
+</tr>
+<tr>
+<td>
+4
+</td>
+<td>
+101100110010101111
+</td>
+</tr>
+<tr>
+<td>
+[
+</td>
+<td>
+10110011001010111011
+</td>
+</tr>
+<tr>
+<td>
+#
+</td>
+<td>
+101100110010101110000
+</td>
+</tr>
+<tr>
+<td>
+]
+</td>
+<td>
+101100110010101110001
+</td>
+</tr>
+<tr>
+<td>
+%
+</td>
+<td>
+101100110010101110010
+</td>
+</tr>
+<tr>
+<td>
+=
+</td>
+<td>
+101100110010101110011
+</td>
+</tr>
+<tr>
+<td>
+@
+</td>
+<td>
+101100110010101110100
+</td>
+</tr>
+<tr>
+<td>
+$
+</td>
+<td>
+101100110010101110101
+</td>
+</tr>
+</table>
+<hr />
+<p><em>Credit for the Huffman portion: Nick Howe</em></p>
+</body>
+</html>
