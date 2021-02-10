@@ -1,0 +1,111 @@
+\documentclass[12pt]{article}
+\usepackage{geometry} % see geometry.pdf on how to lay out the page. There's lots.
+\geometry{a4paper} % or letter or a5paper or ... etc
+% \geometry{landscape} % rotated page geometry
+\usepackage{url}
+\usepackage[hyphenbreaks]{breakurl}
+\def\UrlBreaks{\do\/\do-} % a bit of magic from https://norwied.wordpress.com/2012/07/10/how-to-break-long-urls-in-bibtex/
+\usepackage{hyperref}
+
+\title{ArrayLists and Data}
+\date{ProPublica Lab - Part 2 (one week)} % delete this line to display the current date
+%%% BEGIN DOCUMENT
+\begin{document}
+\maketitle
+
+\section{Background and reminders}
+\begin{itemize}
+    \item Recall the difference between \texttt{==} and \texttt{.equals()}. If you aren't sure, discuss with a peer or a TA/instructor!
+    \item The terms ``Caucasian" and ``White" are used interchangably (at least in the U.S.). The dataset uses them as synonyms.
+    \item As always, make sure your \texttt{main} method does not throw any Exceptions -- it should be handling them.
+    \item As always, please check your work with the \texttt{Verify} files! Do not make changes to these files; instead, make corrections to your work!
+\end{itemize}
+
+\section{Finishing Your Data Storage}
+\label{storage}
+In the previous part of this lab assignment you created a class to store a single row of the dataset.  In this lab, we will create a class to store the full dataset.
+
+As always, make sure you comment thoroughly throughout the lab.
+
+\subsection{Create a new class}
+Create a class that will represent the entire data set (not just one row). Think carefully about what to name it, based on your understanding of the data, so that it correctly indicates what data is being stored. Meaningful names are an essential part of good programming practice!
+
+\subsection{The ArrayList field}
+\label{arrayList}
+We will store each row in an ArrayList. The ArrayList should hold the objects you made in lab 1.  Make a field in your dataset class that holds an ArrayList, and make sure the datatype of the ArrayList is the object type you created in the last lab.
+
+\subsection{Methods}
+
+\subsubsection{Constructor}
+Add a constructor that initializes the field you created as a new ArrayList. It should not take any parameters.
+
+You should also write necessary getter and setter methods. Note that you might add more as necessary as you go along.
+
+\subsubsection{Adding to the array list}
+\label{add-method}
+Recall that the data is read into an ArrayList of String arrays. We need to iterate through the data ArrayList, convert each row (String array) of the data ArrayList into the object you made in the last lab, and add the object to the ArrayList in this class.
+
+Write a method that implements or helps to implement adding to the ArrayList in the class you made. You may choose to design it how you see fit, but feel free to refer back to the pre-lab for ideas.
+
+Since exceptions may occur due to invalid or unexpected input, you will want to have a try-catch statement to handle them.
+
+\subsubsection{Test your addition method}
+In your \texttt{Main} class, make a method called \texttt{testAdding()} to test the method you just wrote. If you haven't implemented \texttt{toString()} method in the last lab, you may find it beneficial to do that now.
+
+You might use JUnit as done in the last lab or print to check the list.
+
+\section{Reading in Data}
+
+\subsection{About the Opencsv library}
+Opencsv is a library that allows you to read in data.  You can read in data from ``compas-scores.csv" using the below code.  You'll also need to add the appropriate imports - Eclipse can help you find them.
+
+We will use CSVReaderHeaderAware from the OpenCSV library for this lab. Because we are using HeaderAware reader, it understands that the first row is the ``header" and does not include it in the data.
+
+The following code demonstrates how you should use it to read the data from ``compas-scores.csv":
+
+\begin{verbatim}
+		CSVReaderHeaderAware reader = new CSVReaderHeaderAware(
+		                                   new FileReader("compas-scores.csv"));
+		ArrayList<String[]> myEntries = new ArrayList<String[]>(reader.readAll());
+		reader.close();
+\end{verbatim}
+This will give you an ArrayList (\texttt{myEntries}), where each index is a String array holding the row data. The indices in the String array correspond to the column indices. For example, the following is a visualiazation \texttt{myEntries}:
+\begin{verbatim}
+<  ["Male", "Other", "F", ...],                 // row 1
+   ["Male", "African-American", "F", ...],      // row 2
+   .... >
+\end{verbatim}
+
+\subsection{Add the data}
+After reading in the data, use it to populate your data structure in the class you wrote. Answer the following questions in your \texttt{README.md} file (add a section below your name and above the questions about difficulty/timing):
+\begin{enumerate}
+\item If any of your validation methods indicate that your precondition assumptions were not met by the data, document what preconditions were violated and in what way.  Update your validation methods one error at a time, documenting all issues, until you can read in all the data.  If this did not happen, mention that.
+\item Describe a person who would generate data that would \emph{not} pass your (updated) precondition assumptions.
+\end{enumerate}
+
+As a last resort after updating your pre-conditions, you should make sure you skip any rows that cause errors so that the data processing continues. \textit{Hint: if you're having trouble with this, where could you put the try-catch statement so that the ``trying" happens for each row?}
+
+\section{Replicate the Analysis}
+Now that you have the data read into your data structure, we can reproduce the analysis ProPublica shows in their chart ``Prediction Fails Differently for Black Defendants."
+
+\subsection{Write the relevant methods}
+Recall how each percentage in the table was calculated. Read ``Understanding Propublica.pdf," and discuss with a peer or an instructor if you need help.
+
+In the data storage you created, write method(s) that iterate through the ArrayList of objects you created in lab 1 and calculate the percentages (in decimals). They should return the percentages as decimals (\texttt{doubles}).
+
+\subsection{Call the methods}
+Call these methods in your \texttt{Main} class's \texttt{main} method. You can check your work by making sure your numbers match the numbers in the ProPublica's chart.
+
+Take a look at \texttt{PropublicaDataTable} class (included with the starter files) - specifically its constructor. Now that you know what you need to construct an instance of the table, make a \texttt{PropublicaDataTable} object by passing your numbers into the constructor.
+
+Make sure you set the \texttt{racialBiasTable} instance variable to the correct table in the \texttt{main} method (+/- 0.1 percent is okay). Feel free to print out the table. Make sure you are able to run \texttt{VerifyFormat\_Lab2.java} and get a passing status.
+
+\section{Your Custom Analysis}
+What you have already done should not be altered by your work in this section. This means you should write \textbf{additional} methods instead of changing the methods you wrote so that your original methods stay the same.
+
+You may especially want to commit and push the work you have done so far as a checkpoint you can revert back to.
+
+\subsection{What counts as recidivism?}
+Find charges that, based on the \texttt{r\_charge\_desc}, you think should not count as recidivism.  Perform an additional analysis with these decisions - you may need to write additional methods.  Do this using an optionally run method so that you can still run the previous version of the analysis.  Describe the choices you made and what the resulting analysis shows in your \texttt{README.md}.
+
+\end{document}
